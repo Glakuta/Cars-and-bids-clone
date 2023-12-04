@@ -1,12 +1,13 @@
 import AppError from "../utils/appError";
 import { Error as MongooseError } from "mongoose";
+import { NextFunction, Request, Response } from "express";
 
-export const handleCastErrorDB = (err) => {
+const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
   new AppError(message, 400);
 };
 
-export const handleDuplicateFieldsDB = (err) => {
+const handleDuplicateFieldsDB = (err) => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
   console.log(value);
 
@@ -14,21 +15,20 @@ export const handleDuplicateFieldsDB = (err) => {
   return new AppError(message, 400);
 };
 
-export const handleValidationErrorDB = (err: MongooseError.ValidationError) => {
+const handleValidationErrorDB = (err: MongooseError.ValidationError) => {
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data. ${errors.join(" . ")}`;
   return new AppError(message, 400);
 };
 
-export const handleJwtError = () => {
+const handleJwtError = () => {
   new AppError("Invalid token, please login again!", 401);
 };
 
-export const handleExpiredToken = () => {
+const handleExpiredToken = () => {
   new AppError("Your token has expired, please login again", 403);
 };
-
-export const sendErrDev = (err, res) => {
+const sendErrDev = (err, res) => {
   res.status(err.stausCode).json({
     status: err.status,
     error: err,
@@ -55,5 +55,30 @@ const sendErrorProd = (err, res) => {
       status: "error",
       message: "Something went very wrong!",
     });
+  }
+};
+
+export const errorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+
+  if (process.env.NODE_ENV === "development") {
+    sendErrDev(err, res);
+  } else if (process.env.NODE_ENV === "production") {
+    let error = { ...err };
+
+    if (error.name === "CastError") error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === "ValidationError")
+      error = handleValidationErrorDB(error);
+    if (error.name === "JsonWebTokenError") error = handleJwtError();
+    if (error.name === "TokenExpiredError") error = handleExpiredToken();
+
+    sendErrorProd(error, res);
   }
 };

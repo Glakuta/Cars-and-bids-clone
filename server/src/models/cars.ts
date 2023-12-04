@@ -12,7 +12,9 @@ const CarSchema = new mongoose.Schema({
   carDamage: { type: Boolean, require: true },
   carMods: { type: Boolean, require: true },
   modeDetails: { type: Text },
-  damageDetailis: { type: Text },
+  damageDetailis: { type: Text, required: true },
+  comments: { type: String },
+  seller: {},
 });
 
 export const CarsModel = mongoose.model("Cars", CarSchema);
