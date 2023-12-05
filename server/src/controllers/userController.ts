@@ -17,17 +17,35 @@ export const getAllUsers = catchAsync(
   }
 );
 
+export const getUsrer = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user) {
+      return next(new AppError("There is no user with this id!", 401));
+    }
+
+    res.status(200).json({
+      staus: "Success",
+      data: {
+        user: user,
+      },
+    });
+  }
+);
+
 export const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.body.password || req.body.confirmPassword) {
       return next(new AppError("You can't update password here", 401));
     }
 
-    const update = User.findOneAndUpdate({ _id: req.params.id });
-
+    const user = User.findOneAndUpdate({ _id: req.params.id }, req.body);
+    if (!user) {
+      return next(new AppError("There is no user with this id!", 401));
+    }
     res.status(200).json({
       status: "success",
-      user: update,
+      user: user,
     });
   }
 );

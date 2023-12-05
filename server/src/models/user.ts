@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
+import UserInterface from "../interface/user.interface";
 import { isEmail } from "validator";
+import bcrypt from "bcrypt";
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema<UserInterface>({
   _id: String,
   username: { type: String, required: true, minlength: 5, maxlenghth: 40 },
   email: {
@@ -46,4 +48,12 @@ const UserSchema = new mongoose.Schema({
   resetPasswordTokenExpiredAt: Date,
 });
 
-export const User = mongoose.model("Users", UserSchema);
+UserSchema.statics.correctPassword = async function (
+  candidatePassword: string,
+  userPassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+export const User = mongoose.model<UserInterface>("Users", UserSchema);
+export { UserInterface };
