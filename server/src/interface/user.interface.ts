@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 
-interface UserInterface extends Document {
+export default interface UserInterface extends Document {
   username: string;
   email: string;
   password: string;
@@ -19,6 +19,10 @@ interface UserInterface extends Document {
     candidatePassword: string,
     userPassword: string
   ): Promise<boolean>;
+  changedPasswordAfter(JWTTimeStamp: Date): boolean;
+  createResetPasswordToken: () => string;
 }
 
-export default UserInterface;
+export default interface AuthRequest extends Request {
+  user?: UserInterface;
+}

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import UserInterface from "../interface/user.interface";
 import { isEmail } from "validator";
 import bcrypt from "bcrypt";
+import { randomBytes, createHash } from "crypto";
 
 const UserSchema = new mongoose.Schema<UserInterface>({
   _id: String,
@@ -55,5 +56,23 @@ UserSchema.statics.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+UserSchema.methods.changedPasswordAfter = function (JWTTimeStamp: Date) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = this.passwordChangedAt.getTime();
+    return JWTTimeStamp < changedTimestamp;
+  }
+  // False means NOT changed
+  return false;
+};
+UserSchema.methods.createResetPasswordToken = function () {
+  const resetToken = randomBytes(32).toString("hex");
+
+  this.resetPasswordToken = createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.resetPasswordTokenExpiredAt = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
+};
 export const User = mongoose.model<UserInterface>("Users", UserSchema);
 export { UserInterface };

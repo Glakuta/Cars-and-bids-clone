@@ -19,6 +19,7 @@
     "http-status-codes": "^2.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.3",
+    "nodemailer": "^6.9.7",
     "nodemon": "^3.0.2",
     "uuid": "^9.0.0",
     "validator": "^13.11.0"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
     "@types/cors": "^2.8.13",
+    "@types/crypto-js": "^4.2.1",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
     "@types/helmet": "^4.0.0",

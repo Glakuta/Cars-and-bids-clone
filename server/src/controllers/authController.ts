@@ -4,7 +4,16 @@ import jwt from "jsonwebtoken";
 import catchAsync from "../utils/catchAsync";
 import { User, UserInterface } from "../models/user";
 import AppError from "../utils/appError";
+import { resolveSoa } from "dns";
 
+interface AuthRequest extends Request {
+  user?: UserInterface;
+}
+const isUserDefined = (
+  req: AuthRequest
+): req is AuthRequest & { user: UserInterface } => {
+  return Boolean(req.user);
+};
 const verify = promisify(jwt.verify);
 
 const singnToken = (_id) => {
@@ -85,5 +94,73 @@ export const login = catchAsync(
     }
 
     createSendToken(user, 200, res);
+  }
+);
+
+export const protect = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return next(
+        new AppError(
+          "You have no permission to view this page, please log in",
+          400
+        )
+      );
+    }
+
+    const decoded = await verify(token, process.env.JWT_SECRET);
+
+    const currentUser = await User.findById({ _id: decoded.id }).select(
+      "+passwordChangedAt"
+    );
+    if (!currentUser) {
+      return next(new AppError("There is no user with this id", 403));
+    }
+
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError(
+          "User recently changed password! Please log in again.",
+          401
+        )
+      );
+    }
+    req.user = currentUser;
+    next();
+  }
+);
+
+export const restrictTo = (...roles) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!isUserDefined(req)) {
+      return next(new AppError("User is not defined", 500));
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action", 403)
+      );
+    }
+
+    next();
+  };
+};
+
+export const forgotPassword = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const user = User.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new AppError("There is no user with this email", 401));
+    }
+
+    const resetToken = user.createResetPasswordToken();
   }
 );
