@@ -13,8 +13,8 @@ export default interface UserInterface extends Document {
   _id: string;
   createdAt?: Date;
   passwordChangedAt?: Date;
-  resetPasswordToken: string;
-  resetPasswordTokenExpiredAt: Date;
+  resetPasswordToken: String | undefined;
+  resetPasswordTokenExpiredAt: Date | undefined;
   correctPassword(
     candidatePassword: string,
     userPassword: string
