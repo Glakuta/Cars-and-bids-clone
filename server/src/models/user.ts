@@ -1,16 +1,15 @@
 import mongoose from "mongoose";
 import UserInterface from "../interface/user.interface";
-import { isEmail } from "validator";
+import isEmail from "validator";
 import bcrypt from "bcrypt";
 import { randomBytes, createHash } from "crypto";
 
 const UserSchema = new mongoose.Schema<UserInterface>({
   _id: String,
-  username: { type: String, required: true, minlength: 5, maxlenghth: 40 },
+  username: { type: String, required: true, minlength: 5, maxlength: 40 },
   email: {
     type: String,
-    requird: true,
-    validate: [isEmail, "Invalid email"],
+    required: true,
     unique: true,
     lowercase: true,
   },
@@ -19,7 +18,7 @@ const UserSchema = new mongoose.Schema<UserInterface>({
     type: String,
     required: [true, "Password dosent match"],
     validate: {
-      validator: function (value) {
+      validator: function (this: UserInterface, value: string): boolean {
         return this.password === value;
       },
       message: "Password confirmation does not match password",
@@ -28,7 +27,7 @@ const UserSchema = new mongoose.Schema<UserInterface>({
   fullName: { type: String },
   phoneNumber: { type: Number },
   profile: {
-    bio: { type: Text },
+    bio: { type: String },
     photo: { type: String },
   },
   role: {

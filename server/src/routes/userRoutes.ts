@@ -15,8 +15,8 @@ import {
 
 const router = Router();
 
-router.post("/login", signIn);
-router.post("/signup", login);
+router.post("/login", login);
+router.post("/signin", signIn);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", protect, updatePassword);

@@ -26,3 +26,9 @@ export default interface UserInterface extends Document {
 export default interface AuthRequest extends Request {
   user?: UserInterface;
 }
+
+export default interface EmailOptions {
+  email: string;
+  subject: string;
+  message: string;
+}

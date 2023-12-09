@@ -11,6 +11,12 @@ import { resolveSoa } from "dns";
 interface AuthRequest extends Request {
   user?: UserInterface;
 }
+
+interface DecodedToken {
+  id: string;
+  iat: Date;
+  // Add other properties if needed
+}
 const isUserDefined = (
   req: AuthRequest
 ): req is AuthRequest & { user: UserInterface } => {
@@ -18,8 +24,14 @@ const isUserDefined = (
 };
 const verify = promisify(jwt.verify);
 
-const signToken = (_id) => {
-  return jwt.sign({ _id }, process.env.JWT_SECRET, {
+const signToken = (_id: string) => {
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error("JWT secret is not defined");
+  }
+
+  return jwt.sign({ _id }, jwtSecret, {
     expiresIn: process.env.JWT_SECRET_EXPIRES,
   });
 };
@@ -58,11 +70,12 @@ const createSendToken = (
 
 export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Request Body:", req.body);
     const newUser = User.create({
       email: req.body.email,
       username: req.body.username,
       password: req.body.password,
-      confirmPassword: req.body.confirmPassword,
+      passwordConfirm: req.body.passwordConfirm,
     });
 
     const token = console.log("token");
@@ -101,6 +114,7 @@ export const login = catchAsync(
 
 export const protect = catchAsync(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const jwtSecret = process.env.JWT_SECRET;
     let token;
     if (
       req.headers.authorization &&
@@ -118,11 +132,14 @@ export const protect = catchAsync(
       );
     }
 
-    const decoded = await verify(token, process.env.JWT_SECRET);
+    const decoded = (await jwt.verify(
+      token,
+      jwtSecret!
+    )) as unknown as DecodedToken;
 
-    const currentUser = await User.findById({ _id: decoded.id }).select(
-      "+passwordChangedAt"
-    );
+    const currentUser = await User.findById({
+      _id: decoded.id,
+    }).select("+passwordChangedAt");
     if (!currentUser) {
       return next(new AppError("There is no user with this id", 403));
     }
@@ -140,7 +157,7 @@ export const protect = catchAsync(
   }
 );
 
-export const restrictTo = (...roles) => {
+export const restrictTo = (...roles: Array<string>) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!isUserDefined(req)) {
       return next(new AppError("User is not defined", 500));

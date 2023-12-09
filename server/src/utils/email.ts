@@ -1,6 +1,12 @@
 import { TransportOptions, Transporter, createTransport } from "nodemailer";
 
-export const sendEmail = async (options) => {
+interface EmailOptions {
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export const sendEmail = async (options: EmailOptions) => {
   const transporter: Transporter = createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
