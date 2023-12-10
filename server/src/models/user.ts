@@ -1,11 +1,14 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 import UserInterface from "../interface/user.interface";
 import isEmail from "validator";
 import bcrypt from "bcrypt";
 import { randomBytes, createHash } from "crypto";
 
+interface UserModel extends Model<UserInterface> {
+  correctPassword(email: string, password: string): Promise<boolean>;
+}
+
 const UserSchema = new mongoose.Schema<UserInterface>({
-  _id: String,
   username: { type: String, required: true, minlength: 5, maxlength: 40 },
   email: {
     type: String,
@@ -23,6 +26,7 @@ const UserSchema = new mongoose.Schema<UserInterface>({
       },
       message: "Password confirmation does not match password",
     },
+    select: false,
   },
   fullName: { type: String },
   phoneNumber: { type: Number },
@@ -35,17 +39,28 @@ const UserSchema = new mongoose.Schema<UserInterface>({
     enum: ["user", "admin"],
     default: "user",
   },
-  paymentInfo: {
-    cardName: { type: String, required: true },
-    zipCode: { type: String, required: true },
-    creditCardNumber: { type: Number, required: true },
-    expiration: { type: Number, required: true },
-    cvc: { type: Number, required: true },
-  },
   createdAt: Date,
   passwordChangedAt: Date,
-  resetPasswordToken: String,
-  resetPasswordTokenExpiredAt: Date,
+  resetPasswordToken: { type: String },
+  resetPasswordTokenExpiredAt: { type: Date },
+});
+
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined as unknown as string;
+  next();
+});
+
+UserSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  if (!this.resetPasswordToken) {
+    this.passwordChangedAt = new Date(Date.now() - 1000);
+  }
+
+  next();
 });
 
 UserSchema.statics.correctPassword = async function (
@@ -69,9 +84,17 @@ UserSchema.methods.createResetPasswordToken = function () {
   this.resetPasswordToken = createHash("sha256")
     .update(resetToken)
     .digest("hex");
-  this.resetPasswordTokenExpiredAt = Date.now() + 10 * 60 * 1000;
+
+  console.log("Hashed Token:", this.resetPasswordToken);
+
+  this.resetPasswordTokenExpiredAt = Date.now() + 70 * 60 * 1000; // Set to 10 minutes in the future
+  console.log(this.resetPasswordTokenExpiredAt);
 
   return resetToken;
 };
-export const User = mongoose.model<UserInterface>("Users", UserSchema);
+
+export const User = mongoose.model<UserInterface, UserModel>(
+  "Users",
+  UserSchema
+);
 export { UserInterface };

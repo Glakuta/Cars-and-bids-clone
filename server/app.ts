@@ -1,9 +1,11 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import { router as userRoutes } from "./src/routes/userRoutes";
 
 const app = express();
+app.use(express.json());
 dotenv.config({ path: "./.env" });
 const port = process.env.PORT;
 const DB = process.env.DATABASE;

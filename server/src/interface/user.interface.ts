@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 
 export default interface UserInterface extends Document {
   username: string;
@@ -10,21 +10,18 @@ export default interface UserInterface extends Document {
   profile: Array<String>;
   paymentInfo: Object;
   role: "user" | "admin";
-  _id: string;
+  _id: ObjectId;
   createdAt?: Date;
   passwordChangedAt?: Date;
   resetPasswordToken: String | undefined;
   resetPasswordTokenExpiredAt: Date | undefined;
-  correctPassword(
-    candidatePassword: string,
-    userPassword: string
-  ): Promise<boolean>;
+  correctPassword(email: string, password: string): Promise<boolean>;
   changedPasswordAfter(JWTTimeStamp: Date): boolean;
   createResetPasswordToken: () => string;
 }
 
 export default interface AuthRequest extends Request {
-  user?: UserInterface;
+  user: UserInterface;
 }
 
 export default interface EmailOptions {

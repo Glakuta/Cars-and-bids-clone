@@ -41,7 +41,7 @@ const createSendToken = (
   statusCode: number,
   res: Response
 ) => {
-  const token = signToken(user._id);
+  const token = signToken(user.id);
   const expiresIn = process.env.JWT_COOKIE_EXPIRES
     ? new Date(
         Date.now() +
@@ -70,19 +70,17 @@ const createSendToken = (
 
 export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Request Body:", req.body);
-    const newUser = User.create({
+    const newUser = await User.create({
       email: req.body.email,
       username: req.body.username,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
     });
 
-    const token = console.log("token");
+    createSendToken(newUser, 201, res);
 
     res.status(201).json({
       status: "Success",
-      token,
       data: {
         data: newUser,
       },
@@ -92,9 +90,8 @@ export const signIn = catchAsync(
 
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password, confirmPassword } = req.body;
-
-    if (!email || !password || !confirmPassword) {
+    const { email, password, passwordConfirm } = req.body;
+    if (!email || !password || !passwordConfirm) {
       return next(new AppError("Please provide data", 401));
     }
 
@@ -103,7 +100,7 @@ export const login = catchAsync(
     if (!user) {
       return next(new AppError("There is no such user", 401));
     }
-    const correct = user.correctPassword(password, user.password);
+    const correct = await User.correctPassword(password, user.password);
     if (!correct) {
       return next(new AppError("Wrong email or password", 401));
     }
@@ -132,14 +129,12 @@ export const protect = catchAsync(
       );
     }
 
-    const decoded = (await jwt.verify(
-      token,
-      jwtSecret!
-    )) as unknown as DecodedToken;
+    const decoded = (await jwt.verify(token, jwtSecret!)) as any;
 
     const currentUser = await User.findById({
-      _id: decoded.id,
+      _id: decoded._id,
     }).select("+passwordChangedAt");
+    console.log(currentUser);
     if (!currentUser) {
       return next(new AppError("There is no user with this id", 403));
     }
@@ -181,9 +176,11 @@ export const forgotPassword = catchAsync(
     }
 
     const resetToken = user.createResetPasswordToken();
+    console.log(resetToken);
     const resetUrl = `${req.protocol}://${req.get(
       "host"
     )}/api/v1/users/resetPassword/${resetToken}`;
+
     const message = `Forgot password? Click link below \n ${resetUrl}`;
 
     try {
@@ -213,21 +210,26 @@ export const resetPassword = catchAsync(
     const hashedToken = createHash("sha256")
       .update(req.params.token)
       .digest("hex");
+
+    console.log(req.params.token);
+
     const user = await User.findOne({
-      resetPasswordToken: hashedToken,
+      resetPasswordToken: req.params.token,
       resetPasswordTokenExpiredAt: { $gt: Date.now() },
     });
+
+    console.log(user);
 
     if (!user) {
       return next(new AppError("Token is invalid or has expired", 400));
     }
     user.password = req.body.password;
-    user.passwordConfirm = req.body.passwordConfrim;
+    user.passwordConfirm = req.body.passwordConfirm;
     user.passwordChangedAt = undefined;
     user.resetPasswordTokenExpiredAt = undefined;
     await user.save();
 
-    const token = signToken(user._id);
+    const token = signToken(user.id);
 
     res.status(201).json({
       status: "Success",
@@ -238,9 +240,10 @@ export const resetPassword = catchAsync(
 
 export const updatePassword = catchAsync(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const user = await User.findById({ _id: req.user!.id }).select("+password");
+    console.log(req.user);
+    const user = await User.findById(req.user?.id).select("+password");
     if (
-      !(await user!.correctPassword(req.body.passwordCurrent, user!.password))
+      !(await User.correctPassword(req.body.passwordCurrent, user!.password))
     ) {
       return next(new AppError("Your current password is wrog!", 401));
     }
@@ -249,7 +252,7 @@ export const updatePassword = catchAsync(
     user!.passwordConfirm = req.body.passwordConfirm;
     await user!.save();
 
-    const token = signToken(user!._id);
+    const token = signToken(user!.id);
 
     res.status(201).json({
       status: "Success",
