@@ -20,7 +20,7 @@ export default interface UserInterface extends Document {
   createResetPasswordToken: () => string;
 }
 
-export default interface AuthRequest extends Request {
+export interface AuthRequest extends Request {
   user: UserInterface;
 }
 

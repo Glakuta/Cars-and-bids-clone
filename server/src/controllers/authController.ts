@@ -9,7 +9,7 @@ import { sendEmail } from "../utils/email";
 import { resolveSoa } from "dns";
 
 interface AuthRequest extends Request {
-  user?: UserInterface;
+  user?: UserInterface | undefined;
 }
 
 interface DecodedToken {
