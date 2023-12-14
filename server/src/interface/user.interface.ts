@@ -10,6 +10,7 @@ export default interface UserInterface extends Document {
   profile: Array<String>;
   paymentInfo: Object;
   role: "user" | "admin";
+  cars: ObjectId;
   _id: ObjectId;
   createdAt?: Date;
   passwordChangedAt?: Date;

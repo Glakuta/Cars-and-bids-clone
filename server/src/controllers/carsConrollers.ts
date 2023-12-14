@@ -121,3 +121,35 @@ export const deleteCar = catchAsync(
     });
   }
 );
+
+export const getCarsWithin = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(",");
+    const numericDistance: number = parseFloat(distance);
+
+    const radius =
+      unit === "mi" ? numericDistance / 3963.2 : numericDistance / 6378.1;
+
+    if (!lat || !lng) {
+      next(
+        new AppError(
+          "Please provide latitutr and longitude in the format lat,lng.",
+          400
+        )
+      );
+    }
+
+    const tours = await Car.find({
+      startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+    });
+
+    res.status(200).json({
+      status: "success",
+      results: tours.length,
+      data: {
+        data: tours,
+      },
+    });
+  }
+);

@@ -3,47 +3,54 @@ import UserInterface from "../interface/user.interface";
 import isEmail from "validator";
 import bcrypt from "bcrypt";
 import { randomBytes, createHash } from "crypto";
+import { Car } from "./cars";
 
 interface UserModel extends Model<UserInterface> {
   correctPassword(email: string, password: string): Promise<boolean>;
 }
 
-const UserSchema = new mongoose.Schema<UserInterface>({
-  username: { type: String, required: true, minlength: 5, maxlength: 40 },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  password: { type: String, required: true, minlength: 8, select: false },
-  passwordConfirm: {
-    type: String,
-    required: [true, "Password dosent match"],
-    validate: {
-      validator: function (this: UserInterface, value: string): boolean {
-        return this.password === value;
-      },
-      message: "Password confirmation does not match password",
+const UserSchema = new mongoose.Schema<UserInterface>(
+  {
+    username: { type: String, required: true, minlength: 5, maxlength: 40 },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
     },
-    select: false,
+    password: { type: String, required: true, minlength: 8, select: false },
+    passwordConfirm: {
+      type: String,
+      required: [true, "Password dosent match"],
+      validate: {
+        validator: function (this: UserInterface, value: string): boolean {
+          return this.password === value;
+        },
+        message: "Password confirmation does not match password",
+      },
+      select: false,
+    },
+    fullName: { type: String },
+    phoneNumber: { type: Number },
+    profile: {
+      bio: { type: String },
+      photo: { type: String },
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    cars: {
+      type: mongoose.Schema.ObjectId,
+      ref: Car,
+    },
+    passwordChangedAt: Date,
+    resetPasswordToken: { type: String },
+    resetPasswordTokenExpiredAt: { type: Date },
   },
-  fullName: { type: String },
-  phoneNumber: { type: Number },
-  profile: {
-    bio: { type: String },
-    photo: { type: String },
-  },
-  role: {
-    type: String,
-    enum: ["user", "admin"],
-    default: "user",
-  },
-  createdAt: Date,
-  passwordChangedAt: Date,
-  resetPasswordToken: { type: String },
-  resetPasswordTokenExpiredAt: { type: Date },
-});
+  { timestamps: true }
+);
 
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
