@@ -88,6 +88,46 @@ export const signIn = catchAsync(
   }
 );
 
+export const sendVerifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new AppError("There is no user with this email", 401));
+    }
+
+    const verifyToken = user.createEmailVerificationToken();
+    const verifyUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/users/verifyEmail/${verifyToken}`;
+
+    const message = `Please verify your email. Click link below \n ${verifyUrl}`;
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Your password reset token",
+        message,
+      });
+
+      await user.verifyEmail(verifyToken);
+
+      res.status(200).json({
+        status: "success",
+      });
+    } catch (err) {
+      user.createEmailVerificationToken = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(
+        new AppError("There was an error sending email, try again!", 500)
+      );
+    }
+  }
+);
+
+// export const verifyEmail = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {}
+// );
+
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, passwordConfirm } = req.body;

@@ -6,6 +6,7 @@ import {
   forgotPassword,
   updatePassword,
   resetPassword,
+  sendVerifyEmail,
 } from "../controllers/authController";
 import {
   getUsrer,
@@ -18,6 +19,7 @@ const router = Router();
 router.post("/login", login);
 router.post("/signin", signIn);
 router.post("/forgotPassword", forgotPassword);
+router.get("/verifyToken", sendVerifyEmail);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", protect, updatePassword);
 

@@ -2,10 +2,13 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
+import cors from "cors";
 import { router as userRoutes } from "./src/routes/userRoutes";
+import { corsMiddleware } from "./src/utils/cors";
 
 const app = express();
 app.use(express.json());
+app.use(corsMiddleware);
 dotenv.config({ path: "./.env" });
 const port = process.env.PORT;
 const DB = process.env.DATABASE;

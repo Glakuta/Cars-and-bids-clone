@@ -15,6 +15,9 @@ export default interface UserInterface extends Document {
   createdAt?: Date;
   passwordChangedAt?: Date;
   resetPasswordToken: String | undefined;
+  isVeryfied: boolean;
+  verificationEmailToken: string;
+  verificationEmailExpiredAt: Date;
   resetPasswordTokenExpiredAt: Date | undefined;
   correctPassword(email: string, password: string): Promise<boolean>;
   changedPasswordAfter(JWTTimeStamp: Date): boolean;

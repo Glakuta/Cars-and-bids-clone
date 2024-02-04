@@ -1,6 +1,6 @@
-import { Cars } from "../utils/types/carsType";
+import { Cars } from "./carsType";
 
-export interface IUser {
+export interface User {
   username: string;
   email: string;
   password: string;
@@ -19,7 +19,14 @@ export interface IUser {
   token: string | null;
 }
 
-export interface IGenericResponse {
-  status: string;
-  message: string;
+export interface LoginUserData {
+  email: string;
+  password: string;
+}
+
+export interface RegisterUserData {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }

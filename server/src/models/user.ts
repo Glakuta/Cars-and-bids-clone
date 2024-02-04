@@ -4,6 +4,7 @@ import isEmail from "validator";
 import bcrypt from "bcrypt";
 import { randomBytes, createHash } from "crypto";
 import { Car } from "./cars";
+import AppError from "../utils/appError";
 
 interface UserModel extends Model<UserInterface> {
   correctPassword(email: string, password: string): Promise<boolean>;
@@ -48,6 +49,9 @@ const UserSchema = new mongoose.Schema<UserInterface>(
     passwordChangedAt: Date,
     resetPasswordToken: { type: String },
     resetPasswordTokenExpiredAt: { type: Date },
+    verificationEmailToken: { type: String },
+    verificationEmailExpiredAt: { type: Date },
+    isVeryfied: { type: Boolean, required: true, default: false },
   },
   { timestamps: true }
 );
@@ -98,6 +102,33 @@ UserSchema.methods.createResetPasswordToken = function () {
   console.log(this.resetPasswordTokenExpiredAt);
 
   return resetToken;
+};
+
+UserSchema.methods.createEmailVerificationToken = function () {
+  const verificationToken = randomBytes(32).toString("hex");
+  this.verificationEmailToken = createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+  this.verificationEmailToken = Date.now() + 70 * 60 * 1000;
+  return verificationToken;
+};
+
+UserSchema.methods.verifyEmail = function (token: string) {
+  const user = this;
+
+  if (
+    user.verificationEmailToken !==
+    createHash("sha256").update(token).digest("hex")
+  ) {
+    throw new AppError("Invalid verification token", 400);
+  }
+  if (user.verificationEmailTokenExpires < Date.now()) {
+    throw new AppError("Verification token has expired", 400);
+  }
+
+  user.isVeryfied = true;
+  user.verificationEmailToken = undefined;
+  user.verificationEmailExpiredAt = undefined;
 };
 
 export const User = mongoose.model<UserInterface, UserModel>(
