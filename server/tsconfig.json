@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "strictNullChecks": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": "source",
+    "outDir": "dist",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "paths": {
+      "mongoose": ["./types/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*", "custom.d.ts", "src/helpers", "src/index.ts"]
+}

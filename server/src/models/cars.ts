@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import CarInterface from "../interface/car.interface";
 import { User } from "./user";
 
-const CarSchema = new mongoose.Schema<CarInterface>(
+const CarSchema: Schema<CarInterface> = new mongoose.Schema(
   {
     vin: { type: String, required: true },
     year: { type: Number, required: true },
@@ -16,10 +16,10 @@ const CarSchema = new mongoose.Schema<CarInterface>(
     carMods: { type: Boolean, require: true },
     modeDetails: { type: String },
     damageDetailis: { type: String, required: true },
-    comments: { type: mongoose.Schema.ObjectId },
-    seller: { type: mongoose.Schema.ObjectId, ref: User, required: true },
+    //comments: { type: mongoose.Schema.ObjectId },
+    seller: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
     highestBid: { type: Number },
-    userWithHighestBid: { type: mongoose.Schema.ObjectId, ref: User },
+    userWithHighestBid: { type: mongoose.Schema.ObjectId, ref: "User" },
     auctionExpires: { type: Date },
   },
   { timestamps: true }

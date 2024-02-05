@@ -36,10 +36,10 @@ export const authApi = createApi({
         username: string;
         email: string;
         password: string;
-        confirmPassword: string;
+        passwordConfirm: string;
       }) => {
         return {
-          url: "api/v1/users/register",
+          url: "api/v1/users/signIn",
           method: "POST",
           body,
         };

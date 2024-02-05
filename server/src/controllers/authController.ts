@@ -108,13 +108,15 @@ export const sendVerifyEmail = catchAsync(
         message,
       });
 
-      await user.verifyEmail(verifyToken);
+      if (verifyToken) {
+        await user.verifyEmail(verifyToken);
+      }
 
       res.status(200).json({
         status: "success",
       });
     } catch (err) {
-      user.createEmailVerificationToken = undefined;
+      user.verificationEmailToken = undefined;
       await user.save({ validateBeforeSave: false });
 
       return next(

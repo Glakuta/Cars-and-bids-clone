@@ -4,7 +4,7 @@ export interface IUser {
   username: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  passwordConfirm: string;
   fullName: string;
   phoneNumber?: string;
   profile: {

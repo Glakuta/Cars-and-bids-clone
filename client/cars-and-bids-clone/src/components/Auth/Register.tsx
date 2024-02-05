@@ -35,7 +35,7 @@ const RegistrarionSchema = yup.object().shape({
     .matches(/[0-9]/, "Password need to have at least one number")
 
     .required("Pole wymagane"),
-  confirmPassword: yup.string().required("Password confirmation is required"),
+  passwordConfirm: yup.string().required("Password confirmation is required"),
 });
 
 const LoginSchema = yup.object().shape({
@@ -81,7 +81,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isVisible, onHide }) => {
               username: "",
               email: "",
               password: "",
-              confirmPassword: "",
+              passwordConfirm: "",
             }}
             validationSchema={RegistrarionSchema}
             onSubmit={(values) => registerUser(values)}
@@ -128,11 +128,11 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isVisible, onHide }) => {
                 <div className="flex flex-col gap-2">
                   <label htmlFor="confirmPassword">Confirm Password</label>
                   <Password
-                    name="confirmPassword"
+                    name="passwordConfirm"
                     aria-describedby="username-help"
-                    onChange={handleChange("confirmPassword")}
+                    onChange={handleChange("passwordConfirm")}
                     onBlur={handleBlur}
-                    value={values.confirmPassword}
+                    value={values.passwordConfirm}
                     inputStyle={{ width: "49vh" }}
                     toggleMask
                   />

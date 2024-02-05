@@ -1,6 +1,5 @@
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 import UserInterface from "../interface/user.interface";
-import isEmail from "validator";
 import bcrypt from "bcrypt";
 import { randomBytes, createHash } from "crypto";
 import { Car } from "./cars";
@@ -10,7 +9,7 @@ interface UserModel extends Model<UserInterface> {
   correctPassword(email: string, password: string): Promise<boolean>;
 }
 
-const UserSchema = new mongoose.Schema<UserInterface>(
+const UserSchema: Schema<UserInterface> = new mongoose.Schema<UserInterface>(
   {
     username: { type: String, required: true, minlength: 5, maxlength: 40 },
     email: {

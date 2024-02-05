@@ -9,6 +9,7 @@ import { corsMiddleware } from "./src/utils/cors";
 const app = express();
 app.use(express.json());
 app.use(corsMiddleware);
+
 dotenv.config({ path: "./.env" });
 const port = process.env.PORT;
 const DB = process.env.DATABASE;

@@ -16,12 +16,14 @@ export default interface UserInterface extends Document {
   passwordChangedAt?: Date;
   resetPasswordToken: String | undefined;
   isVeryfied: boolean;
-  verificationEmailToken: string;
+  verificationEmailToken: string | undefined;
   verificationEmailExpiredAt: Date;
   resetPasswordTokenExpiredAt: Date | undefined;
   correctPassword(email: string, password: string): Promise<boolean>;
   changedPasswordAfter(JWTTimeStamp: Date): boolean;
   createResetPasswordToken: () => string;
+  createEmailVerificationToken: () => string | undefined;
+  verifyEmail: (token: string) => Promise<void>;
 }
 
 export interface AuthRequest extends Request {
