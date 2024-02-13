@@ -1,20 +1,30 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setUser } from "../features/userSlice";
 import { User } from "../../utils/types/userTypes";
+//import { useCookies } from "react-cookie";
 
 const BASE_URL = "http://localhost:3500";
 
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/api/users/`,
+    baseUrl: `${BASE_URL}/api/v1/users`,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    prepareHeaders: (headers, { getState }) => {
+      const [cookies] = cookie;
+      const token = cookies.jwt;
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   tagTypes: ["User"],
   endpoints: (builder) => ({
     getMe: builder.query<User, null>({
-      query() {
+      query(userId) {
         return {
-          url: "me",
+          url: `/${userId}`,
           credentials: "include",
         };
       },

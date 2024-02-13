@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Menubar } from "primereact/menubar";
 import { MenuItem } from "primereact/menuitem";
-import AuthDialog from "./Auth/Register";
+import AuthDialog from "./Auth/AuthDialog";
 
 const NavBar = () => {
   const [isAuthVisible, setIsAuthVisible] = useState<boolean>(false);

@@ -7,19 +7,17 @@ import {
   updatePassword,
   resetPassword,
   sendVerifyEmail,
+  verifyEmail,
 } from "../controllers/authController";
-import {
-  getUsrer,
-  updateUser,
-  deleteUser,
-} from "../controllers/userController";
+import { getUser, updateUser, deleteUser } from "../controllers/userController";
 
 const router = Router();
 
 router.post("/login", login);
 router.post("/signin", signIn);
 router.post("/forgotPassword", forgotPassword);
-router.get("/verifyToken", sendVerifyEmail);
+//router.get("/sendVerificationEmail", sendVerifyEmail);
+router.patch("/verifyEmail/:verifyToken", verifyEmail);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", protect, updatePassword);
 
@@ -31,7 +29,7 @@ router.get("/allUsers");
 
 router
   .route("/:id")
-  .get(protect, getUsrer)
+  .get(protect, getUser)
   .patch(protect, updateUser)
   .delete(protect, deleteUser);
 

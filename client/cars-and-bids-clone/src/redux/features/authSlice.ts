@@ -1,32 +1,56 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { User } from "../../utils/types/userTypes";
+import { AuthState } from "../../utils/types/userTypes";
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: { user: {}, token: null, error: null, success: false },
+  initialState: {
+    user: {},
+    token: null,
+    error: null,
+    success: false,
+    loading: true,
+  } as AuthState,
   reducers: {
-    setCredentials: (state, action) => {
-      const { user, accessToken } = action.payload;
-      state.user = user;
-      state.token = accessToken;
+    loginStart: (state) => {
+      state.loading = true;
       state.error = null;
-      state.success = true;
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    logOut: (state, action) => {
-      state.user = {};
+    loginSuccess: (state, action) => {
+      state.loading = false;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+    },
+    loginFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    logOut: (state) => {
+      state.user = null;
       state.token = null;
       state.error = null;
-      state.success = false;
     },
-    setError: (state, action) => {
-      state.error = action.payload;
-      state.success = false;
+    setCredentials: (
+      state,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {
+        payload: { user, token },
+      }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      PayloadAction<{ user: User | null; token: string | null }>
+    ) => {
+      state.user = user;
+      state.token = token;
     },
   },
 });
 
-export const { setCredentials, logOut, setError } = authSlice.actions;
+export const {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  logOut,
+  setCredentials,
+} = authSlice.actions;
 
 export default authSlice.reducer;
 

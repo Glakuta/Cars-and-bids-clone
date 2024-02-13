@@ -36,12 +36,13 @@ const signToken = (_id: string) => {
   });
 };
 
-const createSendToken = (
+const createSendToken = async (
   user: UserInterface,
   statusCode: number,
   res: Response
 ) => {
-  const token = signToken(user.id);
+  const token = await signToken(user.id);
+
   const expiresIn = process.env.JWT_COOKIE_EXPIRES
     ? new Date(
         Date.now() +
@@ -49,13 +50,16 @@ const createSendToken = (
       )
     : undefined;
 
-  const cookieOptions = {
-    expires: expiresIn,
-    httpOnly: true,
-    ...(process.env.NODE_ENV === "production" && { secure: true }),
-  };
+  // const cookieOptions = {
+  //   ...(process.env.NODE_ENV === "production" && { secure: true }),
+  // };
 
-  res.cookie("jwt", token, cookieOptions);
+  res.cookie("jwt", token, {
+    sameSite: "none",
+    secure: true,
+    expires: expiresIn,
+    httpOnly: false,
+  });
 
   user.password = "";
 
@@ -68,6 +72,34 @@ const createSendToken = (
   });
 };
 
+export const sendVerifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new AppError("There is no user with this email", 401));
+    }
+
+    const verifyToken = await user.createEmailVerificationToken();
+    const verifyUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/users/verifyEmail/${verifyToken}`;
+
+    const message = `Please verify your email. Click link below \n ${verifyUrl}`;
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Your veryfication email",
+        message,
+      });
+    } catch (err) {
+      console.log("Błąd", err);
+      return next(
+        new AppError("There was an error sending email, try again!", 500)
+      );
+    }
+  }
+);
+
 export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const newUser = await User.create({
@@ -78,57 +110,45 @@ export const signIn = catchAsync(
     });
 
     createSendToken(newUser, 201, res);
-
-    res.status(201).json({
-      status: "Success",
-      data: {
-        data: newUser,
-      },
-    });
+    sendVerifyEmail(req, res, next);
   }
 );
 
-export const sendVerifyEmail = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return next(new AppError("There is no user with this email", 401));
-    }
-
-    const verifyToken = user.createEmailVerificationToken();
-    const verifyUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/v1/users/verifyEmail/${verifyToken}`;
-
-    const message = `Please verify your email. Click link below \n ${verifyUrl}`;
+export const verifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await sendEmail({
-        email: user.email,
-        subject: "Your password reset token",
-        message,
+      const hashedToken = createHash("sha256")
+        .update(req.params.verifyToken)
+        .digest("hex");
+
+      const user = await User.findOne({
+        verificationEmailToken: hashedToken,
+        verificationEmailExpiredAt: { $gt: Date.now() },
       });
 
-      if (verifyToken) {
-        await user.verifyEmail(verifyToken);
+      if (!user) {
+        res.status(400).json({ message: "There is no user with this token" });
+        return;
       }
 
-      res.status(200).json({
-        status: "success",
-      });
-    } catch (err) {
+      user.isVerified = true;
       user.verificationEmailToken = undefined;
-      await user.save({ validateBeforeSave: false });
+      user.verificationEmailExpiredAt = undefined;
 
+      await user.save();
+
+      // Tworzenie nowego tokena dla zautoryzowanego użytkownika
+      const token = signToken(user.id);
+
+      // Wysłanie odpowiedzi z nowym tokenem
+      res.status(200).json({ token });
+    } catch (err) {
       return next(
-        new AppError("There was an error sending email, try again!", 500)
+        new AppError("There was an error verifying email, try again!", 500)
       );
     }
   }
 );
-
-// export const verifyEmail = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {}
-// );
 
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -218,7 +238,6 @@ export const forgotPassword = catchAsync(
     }
 
     const resetToken = user.createResetPasswordToken();
-    console.log(resetToken);
     const resetUrl = `${req.protocol}://${req.get(
       "host"
     )}/api/v1/users/resetPassword/${resetToken}`;
@@ -252,8 +271,6 @@ export const resetPassword = catchAsync(
     const hashedToken = createHash("sha256")
       .update(req.params.token)
       .digest("hex");
-
-    console.log(req.params.token);
 
     const user = await User.findOne({
       resetPasswordToken: req.params.token,

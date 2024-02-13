@@ -1,31 +1,40 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IGenericResponse } from "../types";
-import { LoginUserData, RegisterUserData } from "../../utils/types/userTypes";
+import {
+  AuthState,
+  LoginUserData,
+  RegisterUserData,
+} from "../../utils/types/userTypes";
 import { userApi } from "./userApi";
 import { redirectDocument } from "react-router-dom";
+import { setCredentials } from "../features/authSlice";
 //import { setCredentials, logOut } from "../../components/Auth/authSlice";
 
 export const authApi = createApi({
   reducerPath: "api", // optional
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3500" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "http://localhost:3500",
+    prepareHeaders: (headers) => {
+      return headers;
+    },
+    credentials: "include",
+  }),
   endpoints: (builder) => ({
-    loginUser: builder.mutation<
-      { access_token: string; status: string },
-      LoginUserData
-    >({
-      query: (body: { email: string; password: string }) => {
+    loginUser: builder.mutation<AuthState, LoginUserData>({
+      query: (data) => {
         return {
           url: "api/v1/users/login",
           method: "POST",
-          body,
+          body: data,
           credentials: "include",
         };
       },
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled;
-          await dispatch(userApi.endpoints.getMe.initiate(null));
+          const { data } = await queryFulfilled;
+          const { user, token } = data;
+          await dispatch(setCredentials({ user, token }));
         } catch (error) {
           return console.log(error);
         }
@@ -39,10 +48,21 @@ export const authApi = createApi({
         passwordConfirm: string;
       }) => {
         return {
-          url: "api/v1/users/signIn",
+          url: "api/v1/users/signin",
           method: "POST",
           body,
+          //credentials: "include",
         };
+      },
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data.data.user._id);
+
+          await dispatch(userApi.endpoints.getMe.initiate(data.data.user._id));
+        } catch (error) {
+          return console.log(error);
+        }
       },
     }),
     verifyEmail: builder.mutation<

@@ -1,0 +1,21 @@
+{
+  "transmissions": ["All", "Automatic", "Manual"],
+  "BodyStyle": [
+    "All",
+    "Coupe",
+    "Convertable",
+    "Hatchback",
+    "Sedan",
+    "SUV/Crossover",
+    "Truck",
+    "Van",
+    "Wagon"
+  ],
+
+  "SearchOptions": [
+    "Ending soon",
+    "Newly listed",
+    "Lowest millage",
+    "Closest to me"
+  ]
+}

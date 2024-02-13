@@ -5,19 +5,23 @@ import AppError from "../utils/appError";
 
 export const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const users = await User.find();
+    try {
+      const users = await User.find();
 
-    res.status(200).json({
-      status: "Success",
-      results: users.length,
-      data: {
-        data: users,
-      },
-    });
+      res.status(200).json({
+        status: "Success",
+        results: users.length,
+        data: {
+          data: users,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
 
-export const getUsrer = catchAsync(
+export const getUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findOne({ _id: req.params.id });
     if (!user) {

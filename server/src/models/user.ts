@@ -9,7 +9,7 @@ interface UserModel extends Model<UserInterface> {
   correctPassword(email: string, password: string): Promise<boolean>;
 }
 
-const UserSchema: Schema<UserInterface> = new mongoose.Schema<UserInterface>(
+const UserSchema: Schema<UserInterface> = new mongoose.Schema(
   {
     username: { type: String, required: true, minlength: 5, maxlength: 40 },
     email: {
@@ -50,7 +50,7 @@ const UserSchema: Schema<UserInterface> = new mongoose.Schema<UserInterface>(
     resetPasswordTokenExpiredAt: { type: Date },
     verificationEmailToken: { type: String },
     verificationEmailExpiredAt: { type: Date },
-    isVeryfied: { type: Boolean, required: true, default: false },
+    isVerified: { type: Boolean, required: true, default: false },
   },
   { timestamps: true }
 );
@@ -95,10 +95,7 @@ UserSchema.methods.createResetPasswordToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  console.log("Hashed Token:", this.resetPasswordToken);
-
   this.resetPasswordTokenExpiredAt = Date.now() + 70 * 60 * 1000; // Set to 10 minutes in the future
-  console.log(this.resetPasswordTokenExpiredAt);
 
   return resetToken;
 };
@@ -108,26 +105,8 @@ UserSchema.methods.createEmailVerificationToken = function () {
   this.verificationEmailToken = createHash("sha256")
     .update(verificationToken)
     .digest("hex");
-  this.verificationEmailToken = Date.now() + 70 * 60 * 1000;
-  return verificationToken;
-};
-
-UserSchema.methods.verifyEmail = function (token: string) {
-  const user = this;
-
-  if (
-    user.verificationEmailToken !==
-    createHash("sha256").update(token).digest("hex")
-  ) {
-    throw new AppError("Invalid verification token", 400);
-  }
-  if (user.verificationEmailTokenExpires < Date.now()) {
-    throw new AppError("Verification token has expired", 400);
-  }
-
-  user.isVeryfied = true;
-  user.verificationEmailToken = undefined;
-  user.verificationEmailExpiredAt = undefined;
+  this.verificationEmailExpiredAt = new Date(Date.now() + 70 * 60 * 1000);
+  return this.save().then(() => verificationToken);
 };
 
 export const User = mongoose.model<UserInterface, UserModel>(
