@@ -1,5 +1,5 @@
 import React from "react";
-import MiniBar from "./MiniBar";
+import MiniBar from "../MiniBar";
 
 type Props = {
   img: string;
@@ -8,6 +8,7 @@ type Props = {
   bid: number;
   location: string;
   auctionDescription: string;
+  onClick: React.MouseEventHandler;
 };
 
 const CarsCard = ({
@@ -17,9 +18,10 @@ const CarsCard = ({
   bid,
   location,
   auctionDescription,
+  onClick,
 }: Props) => {
   return (
-    <a className="box-border block p-0 m-0 border-0" onClick={}>
+    <a className="box-border block p-0 m-0 border-0" onClick={onClick}>
       <div className="block mb-4">
         <div>
           <img

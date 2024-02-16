@@ -6,7 +6,6 @@ import {
   LoginUserData,
   RegisterUserData,
 } from "../../utils/types/userTypes";
-import { userApi } from "./userApi";
 import { redirectDocument } from "react-router-dom";
 import { setCredentials } from "../features/authSlice";
 //import { setCredentials, logOut } from "../../components/Auth/authSlice";
@@ -40,7 +39,7 @@ export const authApi = createApi({
         }
       },
     }),
-    registerUser: builder.mutation<IGenericResponse, RegisterUserData>({
+    registerUser: builder.mutation<AuthState, RegisterUserData>({
       query: (body: {
         username: string;
         email: string;
@@ -57,9 +56,8 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log(data.data.user._id);
-
-          await dispatch(userApi.endpoints.getMe.initiate(data.data.user._id));
+          const { user, token } = data;
+          await dispatch(setCredentials({ user, token }));
         } catch (error) {
           return console.log(error);
         }
