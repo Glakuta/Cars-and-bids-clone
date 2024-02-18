@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import cors from "cors";
+import { router as carRoutes } from "./src/routes/carRoutes";
 import { router as userRoutes } from "./src/routes/userRoutes";
 import { corsMiddleware } from "./src/utils/cors";
 
@@ -24,6 +24,7 @@ mongoose
   });
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/cars", carRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, TypeScript Express!");

@@ -15,7 +15,7 @@ const CarSchema: Schema<CarInterface> = new mongoose.Schema(
     carDamage: { type: Boolean, require: true },
     carMods: { type: Boolean, require: true },
     modeDetails: { type: String },
-    damageDetailis: { type: String, required: true },
+    damageDetailis: { type: String },
     //comments: { type: mongoose.Schema.ObjectId },
     seller: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
     highestBid: { type: Number },

@@ -1,9 +1,9 @@
-import { QueryOptions } from "mongoose";
+import { Query, QueryOptions } from "mongoose";
 
 export class APIFeatures {
   query: QueryOptions;
   queryString: Record<string, string>;
-  constructor(query, queryString) {
+  constructor(query: any, queryString: any) {
     this.query = query;
     this.queryString = queryString;
   }
