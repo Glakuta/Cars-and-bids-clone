@@ -37,9 +37,25 @@ const Register = (props: RegisterUserData) => {
           passwordConfirm: "",
         }}
         validationSchema={RegistrarionSchema}
-        onSubmit={(values) => registerUser(values)}
+        onSubmit={(values, { setSubmitting }) => {
+          try {
+            registerUser(values);
+            setSubmitting(false);
+          } catch (error) {
+            console.error(error);
+            setSubmitting(false);
+          }
+        }}
       >
-        {({ values, handleSubmit, handleChange, handleBlur }) => (
+        {({
+          values,
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          isSubmitting,
+          errors,
+          touched,
+        }) => (
           <>
             <div className="flex flex-col">
               <label htmlFor="username">Username</label>
@@ -51,7 +67,9 @@ const Register = (props: RegisterUserData) => {
                 value={values.username}
                 style={{ width: "50vh" }}
               />
-              <small id="username-help">Username is required</small>
+              {errors.username && touched.username && (
+                <small className="p-error">{errors.username}</small>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="username">Email</label>
@@ -63,7 +81,9 @@ const Register = (props: RegisterUserData) => {
                 value={values.email}
                 style={{ width: "50vh" }}
               />
-              <small id="email-help">Email is required</small>
+              {errors.email && touched.email && (
+                <small className="p-error">{errors.email}</small>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password">Password</label>
@@ -76,7 +96,9 @@ const Register = (props: RegisterUserData) => {
                 inputStyle={{ width: "50vh" }}
                 toggleMask
               />
-              <small id="password-help">Password is required</small>
+              {errors.password && touched.password && (
+                <small className="p-error">{errors.password}</small>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="confirmPassword">Confirm Password</label>
@@ -89,13 +111,14 @@ const Register = (props: RegisterUserData) => {
                 inputStyle={{ width: "50vh" }}
                 toggleMask
               />
-              <small id="confirmPassword-help">
-                Password confirmation is required.
-              </small>
+              {errors.passwordConfirm && touched.passwordConfirm && (
+                <small className="p-error">{errors.passwordConfirm}</small>
+              )}
             </div>
             <Button
               label="Sign up"
               onClick={() => handleSubmit()}
+              disabled={isSubmitting}
               style={{
                 width: "49vh",
                 height: "48px",

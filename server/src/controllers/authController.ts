@@ -102,6 +102,12 @@ export const sendVerifyEmail = catchAsync(
 
 export const signIn = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const existingUser = await User.findOne({ email: req.body.email });
+
+    if (existingUser) {
+      return next(new AppError("User with this email already exists", 401));
+    }
+
     const newUser = await User.create({
       email: req.body.email,
       username: req.body.username,
@@ -168,6 +174,18 @@ export const login = catchAsync(
     }
 
     createSendToken(user, 200, res);
+  }
+);
+
+export const logout = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    res.cookie("jwt", "loggedout", {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+    res.status(200).json({
+      status: "success",
+    });
   }
 );
 

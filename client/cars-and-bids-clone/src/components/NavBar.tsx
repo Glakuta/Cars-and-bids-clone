@@ -3,22 +3,29 @@ import { InputText } from "primereact/inputtext";
 import carsLogo from "../assets/cars-logo.png";
 import { Menubar } from "primereact/menubar";
 import { MenuItem } from "primereact/menuitem";
+import Cookies from "js-cookie";
 import AuthDialog from "./Auth/AuthDialog";
 import { useAppSelector } from "../redux/store";
+import { useLogoutMutation } from "../redux/api/authApi";
+import { logOut } from "../redux/features/authSlice";
 
 const NavBar = () => {
   const user = useAppSelector((state) => state.userState.user);
+  const [logout] = useLogoutMutation();
+
   const [isAuthVisible, setIsAuthVisible] = useState<boolean>(false);
   const items: MenuItem[] = [
     { label: "Auctions", url: "/" },
     { label: "Sell Car", url: "/sell-car" },
     { label: "What's cars and bids", url: "/about-us" },
     { label: "Daily Email", url: "/newsteller" },
-    {
-      label: user ? "Sign out" : "Sign in",
-      className: "bg-green-500 hover:bg-cyan-600 hover:text-white ",
-      command: () => toogleAuth(),
-    },
+    !user
+      ? {
+          label: "Sign in",
+          className: "bg-green-500 hover:bg-cyan-600 hover:text-white ",
+          command: () => toogleAuth(),
+        }
+      : {},
   ];
 
   const userProfile: MenuItem = {
@@ -30,7 +37,14 @@ const NavBar = () => {
       { label: "Watchlist" },
       { label: "My Listings" },
       { label: "Settings" },
-      { label: "Sign out" },
+      {
+        label: "Sign out",
+        command: async () => {
+          logout();
+          Cookies.remove("jwt", { path: "/" });
+          logOut();
+        },
+      },
     ],
   };
   const toogleAuth = () => {
@@ -42,9 +56,11 @@ const NavBar = () => {
   const end = (
     <div className="flex flex-row items-center">
       <InputText placeholder="Search" type="text" className="w-full" />
-      <div className="relative">
-        <Menubar model={[userProfile]} className="border-none bg-inherit" />
-      </div>
+      {user ? (
+        <div className="relative">
+          <Menubar model={[userProfile]} className="border-none bg-inherit" />
+        </div>
+      ) : null}
     </div>
   );
 

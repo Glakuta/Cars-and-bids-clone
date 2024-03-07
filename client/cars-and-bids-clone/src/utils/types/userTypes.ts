@@ -25,6 +25,7 @@ export interface LoginUserData {
   email: string;
   password: string;
   passwordConfirm: string;
+  submit?: string;
 }
 
 export interface RegisterUserData {

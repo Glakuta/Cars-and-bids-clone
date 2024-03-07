@@ -48,6 +48,29 @@ export const getAllCars = catchAsync(
   }
 );
 
+export const getMyCars = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userId = req.user?._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new AppError("there is no user with that id", 401));
+    }
+
+    const cars = await Car.find({ seller: user._id });
+    if (!cars) {
+      return next(new AppError("This user has no cars", 401));
+    }
+
+    res.status(200).json({
+      status: "success",
+      results: cars,
+      data: {
+        data: cars,
+      },
+    });
+  }
+);
+
 export const getCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const car = await Car.findById(req.params.id);

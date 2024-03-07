@@ -4,10 +4,16 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import * as yup from "yup";
 import { LoginUserData } from "../../utils/types/userTypes";
-//import { useCookies } from "react-cookie";
 import Cookies from "js-cookie";
 import React from "react";
 import { useLoginUserMutation } from "../../redux/api/authApi";
+
+// type CustomFormikErrors = FormikErrors<{
+//   email: string;
+//   password: string;
+//   passwordConfirm: string;
+//   submit?: string;
+// }>;
 
 const LoginSchema = yup.object().shape({
   email: yup
@@ -21,6 +27,8 @@ const LoginSchema = yup.object().shape({
   passwordConfirm: yup
     .string()
     .min(8, "Provide at least 2 characters")
+    .oneOf([yup.ref("password"), ""], "Passwords must match")
+    .nullable()
     .required("Field required"),
 });
 
@@ -39,12 +47,26 @@ const Login = (props: LoginUserData) => {
           passwordConfirm: "",
         }}
         validationSchema={LoginSchema}
-        onSubmit={(values) => {
-          loginUser(values);
-          Cookies.set("jwt", JSON.stringify(values.email), { path: "/" });
+        onSubmit={(values, { setSubmitting }) => {
+          try {
+            loginUser(values);
+            Cookies.set("jwt", JSON.stringify(values.email), { path: "/" });
+            setSubmitting(false);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (error: any) {
+            console.error(error);
+          }
         }}
       >
-        {({ values, handleSubmit, handleChange, handleBlur }) => (
+        {({
+          values,
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          isSubmitting,
+          errors,
+          touched,
+        }) => (
           <>
             <div className="flex flex-col gap-2">
               <label htmlFor="username">Email</label>
@@ -55,8 +77,11 @@ const Login = (props: LoginUserData) => {
                 onBlur={handleBlur}
                 value={values.email}
                 style={{ width: "49vh" }}
+                className={errors.email && touched.email ? "p-invalid" : ""}
               />
-              <small id="email-help">Email is required</small>
+              {errors.email && touched.email && (
+                <small className="p-error">{errors.email}</small>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password">Password</label>
@@ -68,11 +93,15 @@ const Login = (props: LoginUserData) => {
                   onBlur={handleBlur}
                   inputStyle={{ width: "49vh" }}
                   value={values.password}
+                  className={
+                    errors.password && touched.password ? "p-invalid" : ""
+                  }
                   toggleMask
                 />
               </div>
-
-              <small id="password-help">Password is required</small>
+              {errors.password && touched.password && (
+                <small className="p-error">{errors.password}</small>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password">Password</label>
@@ -84,15 +113,24 @@ const Login = (props: LoginUserData) => {
                   onBlur={handleBlur}
                   inputStyle={{ width: "49vh" }}
                   value={values.passwordConfirm}
+                  className={
+                    errors.passwordConfirm && touched.passwordConfirm
+                      ? "p-invalid"
+                      : ""
+                  }
                   toggleMask
                 />
               </div>
 
-              <small id="password-help">Password is required</small>
+              {errors.passwordConfirm && touched.passwordConfirm && (
+                <small className="p-error">{errors.passwordConfirm}</small>
+              )}
             </div>
+
             <Button
               label="Sign in"
               type="button"
+              disabled={isSubmitting}
               onClick={() => handleSubmit()}
               style={{
                 width: "49vh",

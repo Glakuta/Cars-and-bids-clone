@@ -8,6 +8,7 @@ import {
   resetPassword,
   sendVerifyEmail,
   verifyEmail,
+  logout,
 } from "../controllers/authController";
 import { getUser, updateUser, deleteUser } from "../controllers/userController";
 
@@ -17,6 +18,7 @@ router.post("/login", login);
 router.post("/signin", signIn);
 router.post("/forgotPassword", forgotPassword);
 //router.get("/sendVerificationEmail", sendVerifyEmail);
+router.get("/logout", logout);
 router.patch("/verifyEmail/:verifyToken", verifyEmail);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", protect, updatePassword);
