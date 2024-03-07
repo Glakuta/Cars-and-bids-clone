@@ -1,4 +1,4 @@
-import { Cars } from "../utils/types/carsType";
+import { Car } from "../utils/types/carsType";
 import { User } from "../utils/types/userTypes";
 
 export interface IUser {
@@ -17,7 +17,7 @@ export interface IUser {
     type: string;
     enum: ["user", "admin"];
   };
-  cars: Cars[];
+  cars: Car[];
   token: string | null;
 }
 

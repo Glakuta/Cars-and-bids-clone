@@ -1,36 +1,56 @@
 import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
+import carsLogo from "../assets/cars-logo.png";
 import { Menubar } from "primereact/menubar";
 import { MenuItem } from "primereact/menuitem";
 import AuthDialog from "./Auth/AuthDialog";
+import { useAppSelector } from "../redux/store";
 
 const NavBar = () => {
+  const user = useAppSelector((state) => state.userState.user);
   const [isAuthVisible, setIsAuthVisible] = useState<boolean>(false);
   const items: MenuItem[] = [
-    { label: "Auctions", url: "/auctions" },
+    { label: "Auctions", url: "/" },
     { label: "Sell Car", url: "/sell-car" },
     { label: "What's cars and bids", url: "/about-us" },
     { label: "Daily Email", url: "/newsteller" },
     {
-      label: "Sign in",
+      label: user ? "Sign out" : "Sign in",
       className: "bg-green-500 hover:bg-cyan-600 hover:text-white ",
       command: () => toogleAuth(),
     },
   ];
+
+  const userProfile: MenuItem = {
+    label: "",
+    icon: "pi pi-user",
+    className: "absolute right-0",
+    items: [
+      { label: "Profile", url: "/profile" },
+      { label: "Watchlist" },
+      { label: "My Listings" },
+      { label: "Settings" },
+      { label: "Sign out" },
+    ],
+  };
   const toogleAuth = () => {
     setIsAuthVisible(!isAuthVisible);
   };
   const start = (
-    <img
-      alt="logo"
-      src="../assets/cars-logo.png"
-      height="40"
-      className="mr-2"
-    ></img>
+    <img alt="logo" src={carsLogo} height="80" width="80" className="mr-2" />
   );
-  const end = <InputText placeholder="Search" type="text" className="w-full" />;
+  const end = (
+    <div className="flex flex-row items-center">
+      <InputText placeholder="Search" type="text" className="w-full" />
+      <div className="relative">
+        <Menubar model={[userProfile]} className="border-none bg-inherit" />
+      </div>
+    </div>
+  );
+
+  //items.push(items.splice(4, 1)[0]);
   return (
-    <div className="flex flex-row card">
+    <nav className="relative flex flex-row card">
       <Menubar
         model={items}
         start={start}
@@ -38,7 +58,7 @@ const NavBar = () => {
         className="justify-between w-full text-xl font-semibold text-gray-400 bg-white"
       />
       <AuthDialog isVisible={isAuthVisible} onHide={toogleAuth} />
-    </div>
+    </nav>
   );
 };
 

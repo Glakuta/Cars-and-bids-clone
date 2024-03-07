@@ -4,7 +4,7 @@ export const corsMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  res.header("Access-Control-Allow-Origin", "http://127.0.0.1:5173");
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization, currentUserId, existingUser"

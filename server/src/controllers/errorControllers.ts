@@ -1,16 +1,22 @@
 import AppError from "../utils/appError";
 import { Error as MongooseError } from "mongoose";
-import { NextFunction, Request, Response } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 
-const handleCastErrorDB = (err) => {
+interface CustomError extends MongooseError.CastError {
+  status: number;
+  statusCode: number;
+  isOperational: boolean;
+  errmsg: string;
+}
+
+const handleCastErrorDB = (err: MongooseError.CastError) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
-  new AppError(message, 400);
+  return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  console.log(value);
-
+const handleDuplicateFieldsDB = (err: CustomError) => {
+  const valueMatch = err.errmsg?.match(/(["'])(\\?.)*?\1/);
+  const value = valueMatch ? valueMatch[0] : "unknown";
   const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
 };
@@ -28,8 +34,8 @@ const handleJwtError = () => {
 const handleExpiredToken = () => {
   new AppError("Your token has expired, please login again", 403);
 };
-const sendErrDev = (err, res) => {
-  res.status(err.stausCode).json({
+const sendErrDev = (err: any, res: Response) => {
+  res.status(err.status).json({
     status: err.status,
     error: err,
     message: err.message,
@@ -37,7 +43,7 @@ const sendErrDev = (err, res) => {
   });
 };
 
-const sendErrorProd = (err, res) => {
+const sendErrorProd = (err: CustomError, res: Response) => {
   // Operational, trusted error: send message to client
   if (err.isOperational) {
     res.status(err.statusCode).json({

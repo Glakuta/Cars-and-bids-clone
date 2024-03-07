@@ -4,7 +4,8 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import * as yup from "yup";
 import { LoginUserData } from "../../utils/types/userTypes";
-import { useCookies } from "react-cookie";
+//import { useCookies } from "react-cookie";
+import Cookies from "js-cookie";
 import React from "react";
 import { useLoginUserMutation } from "../../redux/api/authApi";
 
@@ -26,7 +27,7 @@ const LoginSchema = yup.object().shape({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Login = (props: LoginUserData) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [cookies, setCookie] = useCookies(["jwt"]);
+  //const [cookies, setCookie] = useCookies(["jwt"]);
   const [loginUser] = useLoginUserMutation();
   return (
     <div className="flex flex-col items-center justify-around p-3 m-3">
@@ -40,7 +41,7 @@ const Login = (props: LoginUserData) => {
         validationSchema={LoginSchema}
         onSubmit={(values) => {
           loginUser(values);
-          setCookie("jwt", JSON.stringify(values.email), { path: "/" });
+          Cookies.set("jwt", JSON.stringify(values.email), { path: "/" });
         }}
       >
         {({ values, handleSubmit, handleChange, handleBlur }) => (

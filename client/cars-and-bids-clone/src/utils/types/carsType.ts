@@ -21,3 +21,10 @@ export type Car = {
   userWithHighestBid?: User;
   auctionExpires?: Date;
 };
+
+export type Cars = {
+  cars: Car[];
+  error: string | null;
+  loading: boolean;
+  success: boolean;
+};

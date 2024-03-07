@@ -1,26 +1,34 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IGenericResponse } from "../types";
 import {
-  AuthState,
   LoginUserData,
   RegisterUserData,
+  User,
 } from "../../utils/types/userTypes";
-import { redirectDocument } from "react-router-dom";
-import { setCredentials } from "../features/authSlice";
+import { userApi } from "./userApi";
+
 //import { setCredentials, logOut } from "../../components/Auth/authSlice";
 
 export const authApi = createApi({
-  reducerPath: "api", // optional
+  reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3500",
     prepareHeaders: (headers) => {
       return headers;
     },
-    credentials: "include",
   }),
   endpoints: (builder) => ({
-    loginUser: builder.mutation<AuthState, LoginUserData>({
+    loginUser: builder.mutation<
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {
+        token: string;
+        status: string;
+        data: { user: User };
+      },
+      LoginUserData
+    >({
       query: (data) => {
         return {
           url: "api/v1/users/login",
@@ -32,15 +40,18 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          const { user, token } = data;
-          await dispatch(setCredentials({ user, token }));
+          const options = [data.data.user._id, data.token];
+          await dispatch(userApi.endpoints.getMe.initiate(options));
         } catch (error) {
           return console.log(error);
         }
       },
     }),
-    registerUser: builder.mutation<AuthState, RegisterUserData>({
-      query: (body: {
+    registerUser: builder.mutation<
+      { accessToken: string; status: string; user: User },
+      RegisterUserData
+    >({
+      query: (data: {
         username: string;
         email: string;
         password: string;
@@ -49,15 +60,14 @@ export const authApi = createApi({
         return {
           url: "api/v1/users/signin",
           method: "POST",
-          body,
+          body: data,
           //credentials: "include",
         };
       },
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          const { user, token } = data;
-          await dispatch(setCredentials({ user, token }));
+          await dispatch(userApi.endpoints.getMe.initiate(data.user._id));
         } catch (error) {
           return console.log(error);
         }

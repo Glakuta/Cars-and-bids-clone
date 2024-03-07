@@ -35,7 +35,6 @@ export interface RegisterUserData {
 }
 
 export interface IGenericResponse {
-  data: { user: User } | null;
   status: string;
   message: string;
 }

@@ -6,14 +6,14 @@ import Tailwind from "primereact/passthrough/tailwind";
 import { Provider } from "react-redux";
 import { PrimeReactProvider } from "primereact/api";
 import { store } from "./redux/store.ts";
-import { BrowserRouter as Router } from "react-router-dom";
+import { CookiesProvider } from "react-cookie";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <PrimeReactProvider value={{ unstyled: true, pt: Tailwind }}>
-    <Provider store={store}>
-      <Router>
+    <CookiesProvider>
+      <Provider store={store}>
         <App />
-      </Router>
-    </Provider>
+      </Provider>
+    </CookiesProvider>
   </PrimeReactProvider>
 );

@@ -58,7 +58,7 @@ const createSendToken = async (
     sameSite: "none",
     secure: true,
     expires: expiresIn,
-    httpOnly: false,
+    httpOnly: true,
   });
 
   user.password = "";
