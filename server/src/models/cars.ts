@@ -11,6 +11,7 @@ const CarSchema: Schema<CarInterface> = new mongoose.Schema(
     transmission: { type: String, required: true },
     mileage: { type: Number, required: true },
     specialOptions: { type: String },
+    images: { type: [String] },
     carLocation: { type: String, required: true },
     carDamage: { type: Boolean, require: true },
     carMods: { type: Boolean, require: true },

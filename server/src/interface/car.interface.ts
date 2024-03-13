@@ -6,6 +6,7 @@ export default interface CarInterface {
   year: number;
   make: string;
   model: string;
+  images: string[];
   transmission: string;
   mileage: number;
   specialOptions: string;

@@ -2,8 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // Domyślnie używa localStorage dla web
-
+import storageSession from "redux-persist/lib/storage/session";
 import { authApi } from "./api/authApi";
 import { carsApi } from "./api/carsApi";
 import { userApi } from "./api/userApi";
@@ -11,7 +10,7 @@ import userReducer from "./features/authSlice";
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: storageSession,
 };
 
 const persistedReducer = persistReducer(persistConfig, userReducer);

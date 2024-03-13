@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import dotenv from "dotenv";
 import catchAsync from "../utils/catchAsync";
 import AppError from "../utils/appError";
 import multer from "multer";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Car } from "../models/cars";
 import { User } from "../models/user";
 import { APIFeatures } from "../utils/apiFeatures";
@@ -13,21 +14,8 @@ interface AuthRequest extends Request {
   user?: UserInterface;
 }
 
-const bucketName = process.env.BUCCKET_NAME as string;
-const bucketRegion = process.env.BUCKET_REGION as string;
-const s3AceessKey = process.env.S3_ACCESS_KEY as string;
-const s3SecretKey = process.env.S3_SECRET_KEY as string;
-
-const s3 = new S3Client({
-  credentials: {
-    accessKeyId: s3AceessKey,
-    secretAccessKey: s3SecretKey,
-  },
-  region: bucketRegion,
-});
-
-const storage: multer.StorageEngine = multer.memoryStorage();
-const upload: multer.Multer = multer({ storage: storage });
+dotenv.config({ path: "./.env" });
+const uploadJson = multer();
 
 export const getAllCars = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -93,57 +81,28 @@ export const sellCar = catchAsync(
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    const userId = req.user?._id;
-    const user = await User.findById(userId);
+    uploadJson.none()(req, res, async (err) => {
+      console.log("Body: ", req.body);
+      const userId = req.user?._id;
+      const user = await User.findById(userId);
 
-    if (!user) {
-      return next(new AppError("there is no user with that id", 401));
-    }
+      if (!user) {
+        return next(new AppError("there is no user with that id", 401));
+      }
 
-    const car = Car.create({
-      ...req.body,
-      seller: userId,
-    });
-    res.status(201).json({
-      status: "success",
-      data: {
-        data: car,
-      },
+      const car = await Car.create({
+        ...req.body,
+        seller: userId,
+      });
+      res.status(201).json({
+        status: "success",
+        data: {
+          data: car,
+        },
+      });
     });
   }
 );
-
-export const uploadImages = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (!req.file) {
-    // Jeśli nie ma przesłanego pliku, przejdź dalej
-    return next();
-  }
-  try {
-    req.file?.buffer;
-
-    const params = {
-      Bucket: bucketName,
-      Key: req.file?.originalname,
-      Body: req.file?.buffer,
-      ContentType: req.file?.mimetype,
-    };
-
-    const command = new PutObjectCommand(params);
-    console.log(params);
-    console.log(command);
-    console.log("Hello World!");
-
-    await s3.send(command);
-
-    next();
-  } catch (error) {
-    console.log("Błąd: ", error);
-  }
-};
 
 export const bidCar = catchAsync(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -152,8 +111,6 @@ export const bidCar = catchAsync(
     if (!user) {
       return next(new AppError("there is no user with that id", 401));
     }
-
-    //const car = await Car.findById();
 
     const bid = await Car.findByIdAndUpdate(req.params.id, {
       highestBid: req.body.highestBid,
@@ -183,6 +140,7 @@ export const updateCar = catchAsync(
         data: car,
       },
     });
+    next();
   }
 );
 

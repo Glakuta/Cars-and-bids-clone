@@ -6,13 +6,11 @@ import { MenuItem } from "primereact/menuitem";
 import Cookies from "js-cookie";
 import AuthDialog from "./Auth/AuthDialog";
 import { useAppSelector } from "../redux/store";
-import { useLogoutMutation } from "../redux/api/authApi";
+//import { useLogoutMutation } from "../redux/api/authApi";
 import { logOut } from "../redux/features/authSlice";
 
 const NavBar = () => {
   const user = useAppSelector((state) => state.userState.user);
-  const [logout] = useLogoutMutation();
-
   const [isAuthVisible, setIsAuthVisible] = useState<boolean>(false);
   const items: MenuItem[] = [
     { label: "Auctions", url: "/" },
@@ -40,8 +38,8 @@ const NavBar = () => {
       {
         label: "Sign out",
         command: async () => {
-          logout();
           Cookies.remove("jwt", { path: "/" });
+          localStorage.clear();
           logOut();
         },
       },

@@ -8,6 +8,7 @@ import { corsMiddleware } from "./src/utils/cors";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
 
 dotenv.config({ path: "./.env" });

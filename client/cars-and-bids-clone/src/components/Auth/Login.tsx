@@ -8,13 +8,6 @@ import Cookies from "js-cookie";
 import React from "react";
 import { useLoginUserMutation } from "../../redux/api/authApi";
 
-// type CustomFormikErrors = FormikErrors<{
-//   email: string;
-//   password: string;
-//   passwordConfirm: string;
-//   submit?: string;
-// }>;
-
 const LoginSchema = yup.object().shape({
   email: yup
     .string()
@@ -34,8 +27,6 @@ const LoginSchema = yup.object().shape({
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Login = (props: LoginUserData) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //const [cookies, setCookie] = useCookies(["jwt"]);
   const [loginUser] = useLoginUserMutation();
   return (
     <div className="flex flex-col items-center justify-around p-3 m-3">
@@ -52,8 +43,7 @@ const Login = (props: LoginUserData) => {
             loginUser(values);
             Cookies.set("jwt", JSON.stringify(values.email), { path: "/" });
             setSubmitting(false);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (error: any) {
+          } catch (error) {
             console.error(error);
           }
         }}
