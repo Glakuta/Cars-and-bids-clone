@@ -19,6 +19,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isVisible, onHide }) => {
 
   return (
     <Dialog
+      data-testId="auth-dialog"
       visible={isVisible}
       onHide={onHide}
       style={{

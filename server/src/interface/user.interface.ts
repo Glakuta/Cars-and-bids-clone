@@ -11,6 +11,7 @@ export default interface UserInterface extends Document {
   paymentInfo: Object;
   role: "user" | "admin";
   cars: ObjectId;
+  favorites: ObjectId[];
   _id: ObjectId;
   createdAt?: Date;
   passwordChangedAt?: Date;

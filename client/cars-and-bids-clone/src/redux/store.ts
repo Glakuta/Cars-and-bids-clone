@@ -6,6 +6,7 @@ import storageSession from "redux-persist/lib/storage/session";
 import { authApi } from "./api/authApi";
 import { carsApi } from "./api/carsApi";
 import { userApi } from "./api/userApi";
+import { commentApi } from "./api/commentsApi";
 import userReducer from "./features/authSlice";
 
 const persistConfig = {
@@ -19,11 +20,17 @@ export const store = configureStore({
   reducer: {
     [authApi.reducerPath]: authApi.reducer,
     [carsApi.reducerPath]: carsApi.reducer,
+    [commentApi.reducerPath]: commentApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     userState: persistedReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({}).concat([authApi.middleware, userApi.middleware]),
+    getDefaultMiddleware({}).concat([
+      authApi.middleware,
+      userApi.middleware,
+      carsApi.middleware,
+      commentApi.middleware,
+    ]),
   devTools: true,
 });
 

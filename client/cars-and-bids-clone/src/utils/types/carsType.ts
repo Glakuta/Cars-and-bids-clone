@@ -1,16 +1,24 @@
 import { User } from "./userTypes";
 
 export type Car = {
-  _id?: string;
-  vin?: string;
-  year?: string;
-  make?: string;
-  model?: string;
+  _id: string;
+  vin: string;
+  year: string;
+  make: string;
+  model: string;
   transmission?: string;
-  details?: string;
-  mileage?: string;
+  images?: string[];
+  interiorColor: string;
+  exteriorColor: string;
+  bodyStyle: string;
+  fuelType: string;
+  engine: string;
+  drivetrain: string;
+  details: string;
+  status: string;
+  mileage: string;
   specialOptions?: string;
-  carLocation?: string;
+  location: string;
   carDamage?: boolean;
   carMods?: boolean;
   modeDetails?: string;
@@ -23,8 +31,14 @@ export type Car = {
 };
 
 export type Cars = {
-  cars: Car[];
+  data: { cars: Car[] };
   error: string | null;
   loading: boolean;
   success: boolean;
 };
+
+export interface FileUploadProps {
+  limit: number;
+  multiple: boolean;
+  name: string;
+}

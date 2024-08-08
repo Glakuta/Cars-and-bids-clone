@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import MiniBar from "../MiniBar";
+import { Link } from "react-router-dom";
 
 type Props = {
   img: string;
-  imgAlt: string;
+  imgAlt?: string;
   title: string;
-  bid: number;
+  bid?: number;
   location: string;
   auctionDescription: string;
-  onClick: React.MouseEventHandler;
+  carId: string | undefined;
 };
 
 const CarsCard = ({
@@ -18,15 +20,20 @@ const CarsCard = ({
   bid,
   location,
   auctionDescription,
-  onClick,
+  carId,
 }: Props) => {
   return (
-    <a className="box-border block p-0 m-0 border-0" onClick={onClick}>
+    <Link
+      className="box-border block p-0 m-0 border-0 cursor-pointer"
+      to={carId ? `/car/${carId}` : "/"}
+    >
       <div className="block mb-4">
         <div>
           <img
             src={img}
             alt={imgAlt}
+            width="50px"
+            height="50px"
             className="block object-cover w-full h-full align-middle opacity-0"
           />
         </div>
@@ -41,7 +48,7 @@ const CarsCard = ({
         <p className="mt-2 text-base font-normal ">{auctionDescription}</p>
         <p className="mt-2 text-base font-light ">{location}</p>
       </div>
-    </a>
+    </Link>
   );
 };
 

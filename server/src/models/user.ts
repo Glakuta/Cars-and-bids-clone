@@ -42,9 +42,15 @@ const UserSchema: Schema<UserInterface> = new mongoose.Schema(
       default: "user",
     },
     cars: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: Car,
     },
+    favorites: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: Car,
+      },
+    ],
     passwordChangedAt: Date,
     resetPasswordToken: { type: String },
     resetPasswordTokenExpiredAt: { type: Date },

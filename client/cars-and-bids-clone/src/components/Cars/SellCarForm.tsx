@@ -11,7 +11,6 @@ import { Dropdown } from "primereact/dropdown";
 import { transmissions } from "../../assets/filters.json";
 import { ToggleButton } from "primereact/togglebutton";
 import TextInput from "../common/formComponnts/TextInput";
-//import { FileUpload } from "primereact/fileupload";
 
 interface CarTypes {
   car: Car;
@@ -30,7 +29,7 @@ const initialValues: Car = {
   modeDetails: "",
   carDamage: false,
   damageDetailis: "",
-  carLocation: "",
+  location: "",
   details: "",
 };
 
@@ -207,41 +206,6 @@ const SellCarForm: React.FC<CarTypes> = () => {
                 !modified
               )}
             </div>
-            {/* <div className="px-8 py-10 mx-4 my-10 bg-gray-300 rounded-lg">
-              <h2 className="mb-6 text-2xl font-bold">Upload image</h2>
-              <FileUpload
-                name="demo[]"
-                url={"/api/upload"}
-                style={{ width: "full" }}
-                chooseOptions={{
-                  style: {
-                    backgroundColor: "#4ad493",
-                    border: "none",
-                  },
-                }}
-                uploadOptions={{
-                  style: {
-                    backgroundColor: "#4ad493",
-                    border: "none",
-                    cursor: "pointer",
-                  },
-                }}
-                cancelOptions={{
-                  style: {
-                    backgroundColor: "red",
-                    border: "none",
-                    cursor: "pointer",
-                  },
-                }}
-                multiple
-                accept="image/*"
-                maxFileSize={0}
-                emptyTemplate={
-                  <p className="m-0">Drag and drop files to here to upload.</p>
-                }
-              />
-            </div> */}
-
             <Button
               label="Confirm"
               type="submit"

@@ -11,3 +11,4 @@ dist
 stats.html
 
 .eslintcache
+*storybook.log

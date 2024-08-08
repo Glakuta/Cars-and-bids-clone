@@ -37,6 +37,7 @@ const NavBar = () => {
       { label: "Settings" },
       {
         label: "Sign out",
+        id: "signout",
         command: async () => {
           Cookies.remove("jwt", { path: "/" });
           localStorage.clear();

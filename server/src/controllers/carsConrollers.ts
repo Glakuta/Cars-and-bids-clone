@@ -9,6 +9,7 @@ import { User } from "../models/user";
 import { APIFeatures } from "../utils/apiFeatures";
 import UserInterface from "../interface/user.interface";
 import { timeStamp } from "console";
+import { ObjectId } from "mongoose";
 
 interface AuthRequest extends Request {
   user?: UserInterface;
@@ -21,7 +22,7 @@ export const getAllCars = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let filter = {};
     if (req.params.carId) filter = { car: req.params.carId };
-    const features = new APIFeatures(await Car.find(filter), req.query)
+    const features = new APIFeatures(Car.find(filter), req.query)
       .filter()
       .sort()
       .limitFields();
@@ -30,7 +31,7 @@ export const getAllCars = catchAsync(
       status: "success",
       results: cars.length,
       data: {
-        data: cars,
+        cars: cars,
       },
     });
   }
@@ -124,6 +125,47 @@ export const bidCar = catchAsync(
         data: bid,
       },
     });
+  }
+);
+
+export const addToFavorites = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const { userId, carId } = req.params;
+
+    const user = await User.findById(userId);
+    const car = await Car.findById(carId);
+    if (!user) {
+      return next(new AppError("there is no user with that id", 401));
+    }
+    if (!car) {
+      return next(new AppError("there is no car with that id", 401));
+    }
+
+    user.favorites.push(car.id);
+    await user.save();
+    res.status(200).json({
+      status: "success",
+      data: {
+        car: user,
+      },
+    });
+  }
+);
+
+export const removeFromFavorites = catchAsync(
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const { userId, carId } = req.params;
+    const user = await User.findById(userId);
+    const car = await Car.findById(carId);
+    if (!user) {
+      return next(new AppError("there is no user with that id", 401));
+    }
+    if (!car) {
+      return next(new AppError("there is no car with that id", 401));
+    }
+
+    user.favorites.slice(car.id);
+    await user.save();
   }
 );
 

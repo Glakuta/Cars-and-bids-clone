@@ -2,10 +2,10 @@ import { InputText } from "primereact/inputtext";
 import React from "react";
 
 type Props = {
-  htmlFor: string;
-  label: string;
+  htmlFor?: string;
+  label?: string;
   id: string;
-  name: string;
+  name?: string;
   onChange: React.ChangeEventHandler<HTMLInputElement> | undefined;
   onBlur?: React.FocusEventHandler<HTMLInputElement> | undefined;
   value: string | undefined;

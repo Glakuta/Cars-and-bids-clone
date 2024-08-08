@@ -9,6 +9,13 @@ export default interface CarInterface {
   images: string[];
   transmission: string;
   mileage: number;
+  status: string;
+  engine: string;
+  drivetrain: string;
+  fuelType: string;
+  bodyStyle: string;
+  interiorColor: string;
+  exteriorColor: string;
   specialOptions: string;
   carLocation: string;
   carDamage: boolean;

@@ -26,7 +26,7 @@ export const uploadImages = async (
   res: Response,
   next: NextFunction
 ) => {
-  const uploadSingle = upload().single("image");
+  const uploadSingle = upload().array("image", 15);
 
   uploadSingle(req, res, async (err) => {
     if (err) {

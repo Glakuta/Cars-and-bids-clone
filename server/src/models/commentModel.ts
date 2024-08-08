@@ -1,6 +1,7 @@
 import mongoose, { Model } from "mongoose";
 import { CommentInterface } from "../interface/comment.interface";
 import { User } from "./user";
+import { Car } from "./cars";
 
 const CommentSchema = new mongoose.Schema<CommentInterface>(
   {
@@ -14,6 +15,11 @@ const CommentSchema = new mongoose.Schema<CommentInterface>(
       minlength: 12,
       maxlength: 256,
       required: true,
+    },
+    car: {
+      type: mongoose.Schema.ObjectId,
+      ref: Car,
+      required: [true, "comment must have a car"],
     },
     isSeller: Boolean,
   },

@@ -24,13 +24,20 @@ export const carsApi = createApi({
           method: "GET",
         };
       },
+      transformResponse: (result: Cars) => {
+        return result;
+      },
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getSingleCar: builder.query<Car, string>({
       query: (id) => {
         return {
           url: `api/v1/cars/${id}`,
           method: "GET",
         };
+      },
+      transformResponse: (result: Car) => {
+        return result;
       },
     }),
     sellCar: builder.mutation<Car, Car>({
